@@ -6,14 +6,25 @@ module Stripe
 
     def url
       if respond_to?(:customer)
-        "#{Customer.url}/#{CGI.escape(customer)}/sources/#{CGI.escape(id)}"
+        "#{Customer.url}/#{CGI.escape(customer)}/bank_accounts/#{CGI.escape(id)}"
       elsif respond_to?(:account)
         "#{Account.url}/#{CGI.escape(account)}/external_accounts/#{CGI.escape(id)}"
       end
     end
 
     def self.retrieve(id, opts=nil)
-      raise NotImplementedError.new("Bank accounts cannot be retrieved without an account ID. Retrieve a bank account using account.external_accounts.retrieve('card_id')")
+      raise NotImplementedError.new("Bank accounts cannot be retrieved without an account ID. Retrieve a bank account using account.external_accounts.retrieve('bank_account_id')")
+    end
+
+    def verify(params={}, opts={})
+      response, opts = request(:post, verify_url, params, opts)
+      refresh_from(response, opts)
+    end
+
+    private
+
+    def verify_url
+      url + "/verify"
     end
   end
 end
